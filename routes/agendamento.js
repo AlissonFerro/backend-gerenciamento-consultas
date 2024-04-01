@@ -4,5 +4,6 @@ const AgendamentoController = require('../controller/Agendamento');
 
 router
     .get('/:id', AgendamentoController.getAllByDoctor)
-
+    .post('/', AgendamentoController.createConsultation)
+    
 module.exports = router

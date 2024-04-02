@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const { patientSchema } = require('./Patient');
+const { userSchema } = require('./User');
 
 const consultationSchema = new mongoose.Schema({
     time: {
@@ -12,6 +13,10 @@ const consultationSchema = new mongoose.Schema({
     },
     patient: {
         type: patientSchema
+    },
+    doctor: {
+        type: userSchema,
+        require: true
     }
 });
 

@@ -30,6 +30,10 @@ const patientSchema = new mongoose.Schema({
     celphone: {
         type: String,
         require: true
+    },
+    cpf: {
+        type: String,
+        require: true
     }
 });
 

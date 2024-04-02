@@ -1,24 +1,25 @@
 const { Patient } = require('../models/Patient');
 const Consultation = require('../models/Consultation');
+const { User } = require('../models/User');
 
 class AgendamentoController{
     static async getAllByDoctor(req, res){ 
-        console.log(req.params);
+        const {id} = req.params;
         try{
-            const patient = await Patient.find();
-            console.log(patient);
-            return res.status(200).send(patient);
+            const consultations = await Consultation.find({ 'doctor._id': id });
+            return res.status(200).send(consultations);
         }catch(error){
             return res.status(500).send({ message: error.message });
         }
     }
 
     static async createConsultation(req, res){
-        console.log(req.body);
+        const { user_id } = req.params;
+
         const { 
             time, 
             hour, 
-            patient_id, 
+            cpf, 
             name, 
             lastname, 
             agreement, 
@@ -28,11 +29,16 @@ class AgendamentoController{
         } = req.body;
 
         try {
-            let patient = await Patient.findById(patient_id);
+            const doctor = await User.findOne({ _id: user_id }, {name: true, lastname: true, cpf: true});
+            
+            if(!doctor) return res.status(404).send({ message: "Usuário não encontrado" });
+            
+            let patient = await Patient.findOne({ cpf });
             if(!patient){
                const newPatient = {
                 name,
                 lastname,
+                cpf,
                 first_consultation: true,
                 agreement,
                 agreement_number,
@@ -45,14 +51,15 @@ class AgendamentoController{
             const consultation = {
                 time,
                 hour,
-                patient
+                patient,
+                doctor
             }
 
             await Consultation.create(consultation);
             return res.status(201).send({ message: "Consulta criada com sucesso" })
             
         } catch (error) {
-            
+            return res.status(500).send({ message: error.message })
         }
     }
 }

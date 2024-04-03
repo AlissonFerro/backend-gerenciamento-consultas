@@ -31,6 +31,22 @@ const userShema = new mongoose.Schema({
     adm: {
         type: Boolean,
         require: true
+    },
+    start_time: {
+        type: Number,
+        require: false
+    },
+    finish_time: {
+        type: Number,
+        require: false
+    },
+    session_time: {
+        type: Number,
+        require: false
+    },
+    consultations: {
+        type: [],
+        require: true
     }
 })
 

@@ -22,7 +22,8 @@ class AuthController{
                 cpf, 
                 CRM,
                 first_access: true,
-                adm
+                adm,
+                consultations: []
             }
             
             await User.create(user);
@@ -31,6 +32,29 @@ class AuthController{
             return res.status(500).send({ message: error.message })
         }
 
+    }
+
+    static async modify(req, res){
+        const { id } = req.params;
+        const { password, start_time, finish_time, session_time } = req.body;
+
+        try {
+            const user = await User.findById(id);
+            if(!user) return res.status(404).send({ message: "Usuário não encontrado" });
+            if(password) {
+                const passCrypto = CryptoJS.AES.encrypt(password, process.env.SECRET).toString();
+                user.password = passCrypto;
+            }
+            if(start_time) {
+                user.start_time = start_time;
+                user.finish_time = finish_time;
+                user.session_time = session_time;
+            }
+            await user.save();
+            return res.status(200).send({message: "Usuário modificado com sucesso"})
+        } catch (error) {
+            return res.status(500).send({ message: error.message })
+        }
     }
 }
 

@@ -13,11 +13,34 @@ class AgendamentoController{
         }
     }
 
+    static async getSessionTime(req, res){
+        const { id } = req.params;
+        try {
+            const doctor = await User.findOne({ _id: id }, {session_time: true, start_time: true, finish_time: true});
+            console.log(doctor)
+            return res.status(200).send(doctor);
+        } catch (error) {
+            return res.status(500).send({message: error.message});
+        }
+    }
+
+    static async getConsultationByDay(req, res){
+        const { id, date } = req.params;
+    
+        try {
+            const doctor = await User.findById(id);
+            const consultations = doctor.consultations.filter(consultation => consultation.date == date)
+            return res.status(200).send(consultations)
+        } catch (error) {
+            return res.status(500).send({ message: error.message });
+        }
+    }
+
     static async createConsultation(req, res){
         const { user_id } = req.params;
 
         const { 
-            time, 
+            date, 
             hour, 
             cpf, 
             name, 
@@ -25,14 +48,31 @@ class AgendamentoController{
             agreement, 
             agreement_number, 
             phone, 
-            celphone 
+            celphone
         } = req.body;
 
+        if(!name) return res.status(400).send({ message: "O nome é obrigatório" });
+        if(!lastname) return res.status(400).send({ message: "O sobrenome é obrigatório" });
+        if(!cpf) return res.status(400).send({ message: "O CPF é obrigatório" });
+        if(!date) return res.status(400).send({ message: "A data é obrigatória" });
+        if(!hour) return res.status(400).send({ message: "A hora é obrigatória" });
+
+
         try {
-            const doctor = await User.findOne({ _id: user_id }, {name: true, lastname: true, cpf: true});
+            const doctor = await User.findOne({ _id: user_id }, {name: true, lastname: true, cpf: true, consultations: true});
             
             if(!doctor) return res.status(404).send({ message: "Usuário não encontrado" });
             
+            const consultationsByDate = doctor.consultations.filter(consultation => consultation.date == date);
+            let avaliable = true;
+
+            consultationsByDate.map((consultation) => {
+                if(consultation.hour == hour) avaliable = false;
+            })
+            if(!avaliable) 
+                return res.status(400).send({message: "Horário indisponível"})            
+        
+
             let patient = await Patient.findOne({ cpf });
             if(!patient){
                const newPatient = {
@@ -48,13 +88,17 @@ class AgendamentoController{
                patient = await Patient.create(newPatient);
             } 
 
-            const consultation = {
-                time,
+            let consultation = {
+                date,
                 hour,
-                patient,
-                doctor
+                patient
             }
+            doctor.consultations.push(consultation);
+            await doctor.save();
 
+            consultation = {
+                date, hour, patient, doctor
+            }
             await Consultation.create(consultation);
             return res.status(201).send({ message: "Consulta criada com sucesso" })
             

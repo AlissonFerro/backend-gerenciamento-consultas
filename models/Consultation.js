@@ -3,7 +3,7 @@ const { patientSchema } = require('./Patient');
 const { userSchema } = require('./User');
 
 const consultationSchema = new mongoose.Schema({
-    time: {
+    date: {
         type: Date,
         require: true
     },

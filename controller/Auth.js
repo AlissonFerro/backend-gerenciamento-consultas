@@ -1,10 +1,32 @@
 const CryptoJS = require("crypto-js");
 const { User } = require("../models/User");
 require('dotenv').config();
+const jwt = require('jsonwebtoken');
+
 class AuthController{
     static async login(req, res){
-        console.log(req.body);
+        const { objCrypto } = req.body;
+        var bytes = CryptoJS.AES.decrypt(objCrypto, process.env.SECRET);
+        const objDecrypt = bytes.toString(CryptoJS.enc.Utf8);
+        const obj = JSON.parse(objDecrypt);
+        const { login, password } = obj;
 
+        const user = await User.findOne({ cpf: login });
+        if(!user) return res.status(404).send({ message: "CPF or password invalid" })
+        
+        bytes = CryptoJS.AES.decrypt(user.password, process.env.SECRET);
+        const passDecrypt = bytes.toString(CryptoJS.enc.Utf8);
+        if(password != passDecrypt) return res.status(404).send({ message: "CPF or password invalid" });
+
+        const token = jwt.sign({
+            id: user.id,
+            adm: user.adm,
+            first_access: user.first_access
+        },process.env.SECRET, {
+            expiresIn: '1day'
+        })
+
+        return res.status(200).send({ token })
     }
 
     static async register(req, res){

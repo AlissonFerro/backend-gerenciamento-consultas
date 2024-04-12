@@ -5,7 +5,8 @@ const AgendamentoController = require('../controller/Agendamento');
 router
     .get('/:id', AgendamentoController.getAllByDoctor)
     .get('/session/:id', AgendamentoController.getSessionTime)
-    .post('/:user_id', AgendamentoController.createConsultation)
     .get('/:id/:date', AgendamentoController.getConsultationByDay)
+    .post('/:user_id', AgendamentoController.createConsultation)
+    .post('/confirm-presence/:id', AgendamentoController.confirmPresence)
     
 module.exports = router

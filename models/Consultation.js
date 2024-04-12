@@ -11,6 +11,9 @@ const consultationSchema = new mongoose.Schema({
         type: String,
         require: true 
     },
+    confirmed_presence: {
+        type: Boolean 
+    },
     patient: {
         type: patientSchema
     },

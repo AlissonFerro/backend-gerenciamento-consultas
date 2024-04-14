@@ -78,6 +78,31 @@ class AuthController{
             return res.status(500).send({ message: error.message })
         }
     }
+
+    static async resetPassword(req, res){
+        const { objCrypto } = req.body;
+        var bytes = CryptoJS.AES.decrypt(objCrypto, process.env.SECRET);
+        const objDecrypt = bytes.toString(CryptoJS.enc.Utf8);
+        const obj = JSON.parse(objDecrypt);
+        const { cpf, password, confirmPassword } = obj;
+        console.log(obj);
+
+        if(password != confirmPassword) return res.status(400).send({ message: "As senhas não correspondem" });
+        if(!password) return res.status(400).send({ message: "password is required" });
+        if(!cpf) return res.status(400).send({ message: "CPF is required" });
+        if(password.length < 6) return res.status(400).send({ message: 'password is sort than 6 characters' })
+        try {
+            const user = await User.findOne({ cpf });
+            if(!user) return res.status(404).send({ message: "User not found" });
+            const passCrypto = CryptoJS.AES.encrypt(password, process.env.SECRET).toString();
+            user.password = passCrypto;
+            await user.save();
+            return res.status(201).send({ message: 'Senha alterada com sucesso' });
+        } catch (error) {
+            console.log(error);
+            return res.status(500).send({ message: error.message });
+        }
+    }
 }
 
 module.exports = AuthController;

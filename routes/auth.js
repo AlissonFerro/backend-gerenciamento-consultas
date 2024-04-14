@@ -6,5 +6,6 @@ router
     .post('/login', AuthController.login)
     .post('/register', AuthController.register)
     .put('/:id', AuthController.modify)
-    
+    .post('/reset-password', AuthController.resetPassword)
+
 module.exports = router

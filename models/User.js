@@ -47,6 +47,10 @@ const userShema = new mongoose.Schema({
     consultations: {
         type: [],
         require: true
+    },
+    vacation: {
+        type: [],
+        require: false
     }
 })
 

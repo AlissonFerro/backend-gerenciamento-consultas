@@ -106,6 +106,7 @@ class AuthController{
     static async createVacation(req, res){
         const { id } = req.params;
         const { vacation } = req.body;
+        console.log(vacation)
         if(!vacation) return res.status(400).send({ message: "Vacation is required" });
         try {
             const user = await User.findById(id);
@@ -114,6 +115,16 @@ class AuthController{
             return res.status(201).send({ message: "Férias salvas com sucesso" });
         } catch (error) {
             return res.status(500).send({ message: error.message })
+        }
+    }
+
+    static async getVacation(req, res){
+        const { id } = req.params;
+        try {
+            const user = await User.findById(id, {password: false });
+            return res.status(200).send(user)
+        } catch (error) {
+            return res.status(500).send({ message: error.message });
         }
     }
 }

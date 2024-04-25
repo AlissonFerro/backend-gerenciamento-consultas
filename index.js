@@ -10,7 +10,7 @@ app.use(cors({
 require('./startup/db')();
 require('./startup/routes')(app);
 
-const port = 8080;
+const port = 8000;
  
 const server = app.listen(port, () => console.log(`Listening on port ${port}`));
 const socketio = new Server(server, {

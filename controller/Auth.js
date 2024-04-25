@@ -127,6 +127,15 @@ class AuthController{
             return res.status(500).send({ message: error.message });
         }
     }
+
+    static async getDoctors(req, res){
+        try {
+            const doctors = await User.find({}, {password: false, vacation: false, consultations: false}).sort({name: 1});
+            return res.status(200).send(doctors);
+        } catch (error) {
+            return res.status(500).send({ message: error.message });
+        }
+    }
 }
 
 module.exports = AuthController;

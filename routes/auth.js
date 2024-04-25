@@ -3,6 +3,7 @@ const router = express.Router();
 const AuthController = require('../controller/Auth');
 
 router
+    .get('/', AuthController.getDoctors)
     .get('/vacation/:id', AuthController.getVacation)
     .post('/login', AuthController.login)
     .post('/register', AuthController.register)

@@ -86,7 +86,7 @@ class AgendamentoController{
 
 
         try {
-            const doctor = await User.findOne({ _id: user_id }, {name: true, lastname: true, cpf: true, consultations: true});
+            const doctor = await User.findOne({ _id: user_id }, {name: true, lastname: true, cpf: true, consultations: true, not_avaliable_consultation: true});
             
             if(!doctor) return res.status(404).send({ message: "Usuário não encontrado" });
             
@@ -129,12 +129,53 @@ class AgendamentoController{
             }
             
             doctor.consultations.push(consultation);
+            const not_avaliable_consultations = doctor.not_avaliable_consultation;
+            const date_consultation = new Date(date);
+            if(not_avaliable_consultations.length <1){
+                let test = {};
+                test[`${date_consultation.getFullYear()}-${date_consultation.getMonth()+1}-${date_consultation.getDate()}`] = {
+                    hours: [hour]
+                };
+                not_avaliable_consultations.push(test);
+            }
+            else{     
+                let avaliable = false;           
+                not_avaliable_consultations.map(not => {
+                    Object.keys(not).map(d => {
+                        if(d == date){
+                            avaliable = true;
+                            not[d].hours.push(date);
+                        }
+                    })
+                });
+                if(!avaliable){
+                    let test = {};
+                    test[`${date_consultation.getFullYear()}-${date_consultation.getMonth()+1}-${date_consultation.getDate()}`] = {
+                        hours: [hour]
+                    };
+                    not_avaliable_consultations.push(test); 
+                }
+            }
+            doctor.not_avaliable_consultation = not_avaliable_consultations;
             await doctor.save();
 
             return res.status(201).send({ message: "Consulta criada com sucesso" })
             
         } catch (error) {
             return res.status(500).send({ message: error.message })
+        }
+    };
+
+    static async getConsultations(req, res){
+        const {id} = req.params;
+        try {
+            const doctor = await User.findOne({_id: id});
+            if(!doctor) return res.status(404).send({ message: 'Doctor not found' });
+            
+            
+
+        } catch (error) {
+            return res.status(500).send({ message: error.message });
         }
     }
 }

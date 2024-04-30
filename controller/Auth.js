@@ -45,7 +45,8 @@ class AuthController{
                 CRM,
                 first_access: true,
                 adm,
-                consultations: []
+                consultations: [],
+                not_avaliable_consultations: []
             }
             
             await User.create(user);

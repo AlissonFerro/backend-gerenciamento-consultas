@@ -51,6 +51,9 @@ const userShema = new mongoose.Schema({
     vacation: {
         type: [],
         require: false
+    },
+    not_avaliable_consultation:{
+        type: []
     }
 })
 

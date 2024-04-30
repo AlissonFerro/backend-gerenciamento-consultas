@@ -4,6 +4,7 @@ const AgendamentoController = require('../controller/Agendamento');
 
 router
     .get('/:id', AgendamentoController.getAllByDoctor)
+    .get('/consultations/:id', AgendamentoController.getConsultations)
     .get('/session/:id', AgendamentoController.getSessionTime)
     .get('/:id/:date', AgendamentoController.getConsultationByDay)
     .post('/:user_id', AgendamentoController.createConsultation)

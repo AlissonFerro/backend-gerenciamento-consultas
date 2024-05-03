@@ -35,6 +35,7 @@ class AgendamentoController {
 
             const consult = doctor.consultations.filter(consultation => consultation._id == id);
             if (!consult) return res.status(404).send({ message: "No consultation found for this doctor" });
+            
             consult[0].confirmed_presence = true;
             consultation.confirmed_presence = true;
 
@@ -51,12 +52,11 @@ class AgendamentoController {
         const { id, date } = req.params;
 
         try {
-            const doctor = await User.findById(id);
+            const doctor = await User.findById(id, {consultations: true});
             const consultations = doctor.consultations.filter(consultation => consultation.date == date);
             consultations.sort((a, b) => {
                 return a.hour - b.hour;
             });
-
             return res.status(200).send(consultations)
         } catch (error) {
             return res.status(500).send({ message: error.message });

@@ -32,6 +32,10 @@ const userShema = new mongoose.Schema({
         type: Boolean,
         require: true
     },
+    admAccont: {
+        type: Boolean,
+        require: true
+    },
     start_time: {
         type: Number,
         require: false
@@ -54,6 +58,10 @@ const userShema = new mongoose.Schema({
     },
     not_avaliable_consultation:{
         type: []
+    },
+    recepcionists: {
+        type: [],
+        require: true
     }
 })
 

@@ -7,6 +7,7 @@ router
     .get('/consultations/:id', AgendamentoController.getConsultations)
     .get('/session/:id', AgendamentoController.getSessionTime)
     .get('/:id/:date', AgendamentoController.getConsultationByDay)
+    .get('/doctor/:id/:date', AgendamentoController.getConsultationByDayForDoctor)
     .post('/:user_id', AgendamentoController.createConsultation)
     .post('/confirm-presence/:id', AgendamentoController.confirmPresence)
     

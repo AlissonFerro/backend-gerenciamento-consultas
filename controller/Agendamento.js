@@ -1,6 +1,7 @@
 const { Patient } = require('../models/Patient');
 const Consultation = require('../models/Consultation');
 const { User } = require('../models/User');
+const { Recepcionist } = require('../models/Recepcionist');
 
 class AgendamentoController {
     static async getAllByDoctor(req, res) {
@@ -17,7 +18,7 @@ class AgendamentoController {
         const { id } = req.params;
         try {
             const doctor = await User.findOne({ _id: id }, { session_time: true, start_time: true, finish_time: true });
-            
+            console.log(doctor);
             return res.status(200).send(doctor);
         } catch (error) {
             return res.status(500).send({ message: error.message });
@@ -48,11 +49,31 @@ class AgendamentoController {
         }
     }
 
+    static async getConsultationByDayForDoctor(req, res){
+        const {id, date} = req.params;
+        try {
+            const doctor = await User.findById(id, {consultations: true});
+            const consultations = doctor.consultations.filter(consultation => consultation.date == date);
+            consultations.sort((a, b) => {
+                return a.hour - b.hour;
+            });
+            return res.status(200).send(consultations);
+        } catch (error) {
+            return res.status(500).send({ message: error.message });
+        } 
+    }
+
     static async getConsultationByDay(req, res) {
         const { id, date } = req.params;
 
         try {
-            const doctor = await User.findById(id, {consultations: true});
+            
+            const recepcionist = await Recepcionist.findById(id);
+
+            const doctor = await User.findByOne({ _id: recepcionist.doctorId}, {consultations: true});
+            
+            if(!doctor) return res.status(404).send({ message: 'No doctor found' });
+
             const consultations = doctor.consultations.filter(consultation => consultation.date == date);
             consultations.sort((a, b) => {
                 return a.hour - b.hour;

@@ -2,6 +2,7 @@ const CryptoJS = require("crypto-js");
 const { User } = require("../models/User");
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
+const { Recepcionist } = require("../models/Recepcionist");
 
 class AuthController{
     static async login(req, res){
@@ -10,27 +11,56 @@ class AuthController{
         const objDecrypt = bytes.toString(CryptoJS.enc.Utf8);
         const obj = JSON.parse(objDecrypt);
         const { login, password } = obj;
+        try {        
+            const user = await User.findOne({ cpf: login });
+            const recepcionist = await Recepcionist.findOne({ cpf: login });
+            if(!user && !recepcionist) return res.status(404).send({ message: "CPF or password invalid" })
+            if(user){
+                bytes = CryptoJS.AES.decrypt(user.password, process.env.SECRET);
+                const passDecrypt = bytes.toString(CryptoJS.enc.Utf8);
+                if(password != passDecrypt) return res.status(404).send({ message: "CPF or password invalid" });
 
-        const user = await User.findOne({ cpf: login });
-        if(!user) return res.status(404).send({ message: "CPF or password invalid" })
-        
-        bytes = CryptoJS.AES.decrypt(user.password, process.env.SECRET);
-        const passDecrypt = bytes.toString(CryptoJS.enc.Utf8);
-        if(password != passDecrypt) return res.status(404).send({ message: "CPF or password invalid" });
+                const token = jwt.sign({
+                    id: user.id,
+                    adm: user.adm,
+                    first_access: user.first_access,
+                    admAccont: user.admAccont
+                },process.env.SECRET, {
+                    expiresIn: '1day'
+                })
+    
+                return res.status(200).send({ token, id: user._id, admAccont: user.admAccont })
+            }
+            else{
+                bytes = CryptoJS.AES.decrypt(recepcionist.password, process.env.SECRET)
+                const passDecrypt = bytes.toString(CryptoJS.enc.Utf8)
+                if(password != passDecrypt) return res.status(404).send({ message: 'CPF or password invalid' });
 
-        const token = jwt.sign({
-            id: user.id,
-            adm: user.adm,
-            first_access: user.first_access
-        },process.env.SECRET, {
-            expiresIn: '1day'
-        })
-
-        return res.status(200).send({ token })
+                const token = jwt.sign({
+                    id: recepcionist.id,
+                    adm: false,
+                    first_access: recepcionist.first_access,
+                    admAccont: recepcionist.admAccont
+                },process.env.SECRET, {
+                    expiresIn: '1day'
+                })
+    
+                return res.status(200).send({ token, id: recepcionist._id, admAccont: recepcionist.admAccont })
+            }
+        } catch (error) {
+            console.log(error);
+            return res.status(500).send({ message: error.message })
+        }
     }
 
     static async register(req, res){
-        const { name, lastname, cpf, CRM, password } = req.body;
+        const { objCrypto } = req.body;
+
+        var bytes = CryptoJS.AES.decrypt(objCrypto, process.env.SECRET);
+        const objDecrypt = bytes.toString(CryptoJS.enc.Utf8);
+        const obj = JSON.parse(objDecrypt);
+        const { name, lastname, cpf, CRM, password } = obj;
+
         try {
             const passCrypto = CryptoJS.AES.encrypt(password, process.env.SECRET).toString();
             let adm = false;
@@ -45,8 +75,10 @@ class AuthController{
                 CRM,
                 first_access: true,
                 adm,
+                admAccont: false,
                 consultations: [],
-                not_avaliable_consultations: []
+                not_avaliable_consultations: [],
+                recepcionist: []
             }
             
             await User.create(user);

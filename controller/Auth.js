@@ -75,7 +75,7 @@ class AuthController{
                 CRM,
                 first_access: true,
                 adm,
-                admAccont: false,
+                admAccont: true,
                 consultations: [],
                 not_avaliable_consultations: [],
                 recepcionist: []

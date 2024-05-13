@@ -69,6 +69,7 @@ class AgendamentoController {
         try {
             
             const recepcionist = await Recepcionist.findById(id);
+            console.log(recepcionist);
 
             const doctor = await User.findByOne({ _id: recepcionist.doctorId}, {consultations: true});
             

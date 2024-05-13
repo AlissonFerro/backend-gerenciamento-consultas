@@ -69,9 +69,8 @@ class AgendamentoController {
         try {
             
             const recepcionist = await Recepcionist.findById(id);
-            console.log(recepcionist);
 
-            const doctor = await User.findByOne({ _id: recepcionist.doctorId}, {consultations: true});
+            const doctor = await User.findOne({ _id: recepcionist.doctorId}, {consultations: true});
             
             if(!doctor) return res.status(404).send({ message: 'No doctor found' });
 

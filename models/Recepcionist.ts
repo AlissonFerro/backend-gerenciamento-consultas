@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
+import mongoose from "mongoose";
 
-const recepcionistShema = new mongoose.Schema({
+export const recepcionistShema = new mongoose.Schema({
     name: {
         type: String,
         require: true,
@@ -30,7 +30,4 @@ const recepcionistShema = new mongoose.Schema({
     }
 })
 
-const Recepcionist = mongoose.model('Recepcionist', recepcionistShema);
-
-exports.Recepcionist = Recepcionist;
-exports.recepcionistShema = recepcionistShema;
+export const Recepcionist = mongoose.model('Recepcionist', recepcionistShema);

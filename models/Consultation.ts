@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from "mongoose";
 const { patientSchema } = require('./Patient');
 const { userSchema } = require('./User');
 
@@ -23,6 +23,4 @@ const consultationSchema = new mongoose.Schema({
     }
 });
 
-const Consultation = mongoose.model('Consultation', consultationSchema);
-
-module.exports = Consultation;
+export const Consultation = mongoose.model('Consultation', consultationSchema);

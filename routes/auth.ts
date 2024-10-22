@@ -1,8 +1,8 @@
-const express = require('express');
-const router = express.Router();
+import express from 'express';
+const authRouter = express.Router();
 const AuthController = require('../controller/Auth');
 
-router
+authRouter
     .get('/', AuthController.getDoctors)
     .get('/vacation/:id', AuthController.getVacation)
     .post('/login', AuthController.login)
@@ -11,4 +11,4 @@ router
     .post('/reset-password', AuthController.resetPassword)
     .post('/:id/vacation', AuthController.createVacation)
 
-module.exports = router
+export default authRouter

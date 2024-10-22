@@ -1,9 +1,9 @@
-const express = require('express');
-const router = express.Router();
+import express from 'express';
+const recepcionistRouter = express.Router();
 const RecepcionistController = require('../controller/Recepcionist');
 
-router
+recepcionistRouter
     .get('/:id', RecepcionistController.getRecepcionists)
     .post('/:id', RecepcionistController.create)
 
-module.exports = router;
+export default recepcionistRouter;

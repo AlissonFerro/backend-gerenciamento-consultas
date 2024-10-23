@@ -3,6 +3,13 @@ import IDoctor from "../interfaces/IDoctor";
 import DoctorRepositories from "../repositories/Doctor";
 
 export default class DoctorService{
+    static async getDoctors() {
+        const doctors = await DoctorRepositories.getDoctors();
+        if(doctors.length < 1)
+            throw new AppError('Nenhum Usuário encontrado', 404);
+
+        return doctors;
+    }
     static async getSessionTime(doctorId: string) {
         const session_time = await DoctorRepositories.getSessionTime(doctorId);
 
@@ -34,5 +41,21 @@ export default class DoctorService{
             throw new AppError('Doctor not found', 404);
         
         return doctor.consultations;
+    }
+
+    static async getByCpf(cpf: string){
+        const doctor = await DoctorRepositories.getByCpf(cpf);
+        if(!doctor)
+            throw new AppError('No user found', 404);
+
+        return doctor;
+    }
+
+    static async getRecepcionistById(doctorId: string){
+        const recepcionists = await DoctorRepositories.getRecepcionistById(doctorId);
+        if(recepcionists.length < 1)
+            throw new AppError('Nenhuma recepcionista encontrada', 404);
+
+        return recepcionists;
     }
 }

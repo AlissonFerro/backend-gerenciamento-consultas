@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
-const { patientSchema } = require('./Patient');
-const { userSchema } = require('./User');
+import { patientSchema } from "./Patient";
+import { userShema } from "./User";
 
-const consultationSchema = new mongoose.Schema({
+export const consultationSchema = new mongoose.Schema({
     date: {
         type: Date,
         require: true
@@ -18,7 +18,7 @@ const consultationSchema = new mongoose.Schema({
         type: patientSchema
     },
     doctor: {
-        type: userSchema,
+        type: userShema,
         require: true
     }
 });

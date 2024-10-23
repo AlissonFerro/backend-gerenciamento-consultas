@@ -5,12 +5,14 @@ import agendamentoRouter from './routes/agendamento';
 import authRouter from './routes/auth';
 import recepcionistRouter from './routes/recepcionist';
 import handleError from './middleware/errorHandle';
+import db from './startup/db';
 
 app.use(cors({
     origin: '*'
 }));
  
-require('./startup/db')();
+db();
+
 app
     .use(express.json())
     .use('/api/auth', authRouter)

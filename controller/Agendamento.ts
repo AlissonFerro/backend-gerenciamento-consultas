@@ -8,7 +8,7 @@ import RecepcionistService from "../service/Recepcionist";
 import PatientService from "../service/Patient";
 import IPacient from "../interfaces/IPacient";
 
-class AgendamentoController {
+export default class AgendamentoController {
     static async getAllByDoctor(req: Request, res: Response): Promise<void>{
         const { id } = req.params;
         const consultations = await AgendamenoService.getAllByDoctor(id);
@@ -74,7 +74,7 @@ class AgendamentoController {
         res.status(200).send(consultationsSorted);    
     }
 
-    static async createConsultation(req: Request, res: Response) {
+    static async createConsultation(req: Request, res: Response): Promise<void> {
         const { user_id } = req.params;
         const {
             date,
@@ -136,14 +136,12 @@ class AgendamentoController {
         doctor.consultations.push(consultation);
         await DoctorService.getByIdAndUpdate(doctor);
         
-        return res.status(201).send({ message: "Consulta criada com sucesso" })
+        res.status(201).send({ message: "Consulta criada com sucesso" })
     }
 
-    static async getConsultations(req: Request, res: Response) {
+    static async getConsultations(req: Request, res: Response): Promise<void> {
         const { id } = req.params;
         const consultations = await DoctorService.getConsultations(id)
-        return res.status(200).send(consultations);
+        res.status(200).send(consultations);
     }
 }
-
-module.exports = AgendamentoController;

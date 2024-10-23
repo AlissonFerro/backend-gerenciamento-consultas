@@ -1,5 +1,6 @@
 import { Date, Types } from "mongoose";
 import IConsultation from "./IConsultation";
+import IRecepcionist from "./IRecepcionist";
 
 export default interface IDoctor{
     _id: Types.ObjectId,
@@ -17,5 +18,5 @@ export default interface IDoctor{
     consultations: IConsultation[],
     vacation: Date[],
     not_avaliable_consultation: Date[],
-    recepcionists: IDoctor[]
+    recepcionists: IRecepcionist[]
 }

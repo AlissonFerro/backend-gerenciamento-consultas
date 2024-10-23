@@ -1,7 +1,8 @@
 import express from 'express';
 import ConsultationMiddleware from '../middleware/Consultation';
+import AgendamentoController from '../controller/Agendamento';
+
 const agendamentoRouter = express.Router();
-const AgendamentoController = require('../controller/Agendamento');
 
 agendamentoRouter
     .get('/:id', AgendamentoController.getAllByDoctor)

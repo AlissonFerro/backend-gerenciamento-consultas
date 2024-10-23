@@ -1,25 +1,28 @@
 import { Request, Response } from "express";
 import AppError from "../Error";
 import DoctorService from "../service/Doctor";
+import RecepcionistService from "../service/Recepcionist";
+import * as jwt from 'jsonwebtoken';
+import CryptoJS from "crypto-js";
 
 const { Recepcionist } = require('../models/Recepcionist');
-const CryptoJS = require("crypto-js");
 require('dotenv').config();
-const jwt = require('jsonwebtoken');
-const { User } = require('../models/User');
 
 export default class RecepcionistController{
     static async login(req: Request, res: Response): Promise<void>{
         const { objCrypto } = req.body;
+        if(!process.env.SECRET)
+            throw new AppError('Dotenv Error', 403);
+
         var bytes = CryptoJS.AES.decrypt(objCrypto, process.env.SECRET);
         const objDecrypt = bytes.toString(CryptoJS.enc.Utf8);
         const obj = JSON.parse(objDecrypt);
         const { login, password } = obj;
 
-        const recepcionist = await Recepcionist.findOne({ cpf: login });
-        if(!recepcionist) 
-            throw new AppError("CPF or password invalid", 404);
-        
+        const recepcionist = await RecepcionistService.getByCpf(login);
+        if(!recepcionist.password)
+            throw new AppError('No password content', 500);
+
         bytes = CryptoJS.AES.decrypt(recepcionist.password, process.env.SECRET);
         const passDecrypt = bytes.toString(CryptoJS.enc.Utf8);
 
@@ -27,7 +30,7 @@ export default class RecepcionistController{
             throw new AppError("CPF or password invalid", 404);
 
         const token = jwt.sign({
-            id: recepcionist.id,
+            id: recepcionist._id,
             first_access: recepcionist.first_access,
             admAccont: recepcionist.admAccont
         },process.env.SECRET, {
@@ -40,6 +43,8 @@ export default class RecepcionistController{
     static async create(req: Request, res: Response): Promise<void>{
         const { id } = req.params;
         const { objCrypto } = req.body;
+        if(!process.env.SECRET)
+            throw new AppError('Dotenv Error', 403);
 
         var bytes = CryptoJS.AES.decrypt(objCrypto, process.env.SECRET);
         const objDecrypt = bytes.toString(CryptoJS.enc.Utf8);
@@ -71,16 +76,12 @@ export default class RecepcionistController{
     static async getRecepcionists(req: Request, res: Response): Promise<void>{
         const { id } = req.params;
 
-        const doctor = await User.findById(id, {recepcionists: true});
-        res.status(200).send(doctor);
+        const recepcionists = await DoctorService.getRecepcionistById(id);
+        res.status(200).send(recepcionists);
     };
 
     static async delete(req: Request, res: Response): Promise<void>{
         const {id} = req.params;
-        try {
-            
-        } catch (error) {
-            
-        }
+
     }
 };

@@ -7,5 +7,6 @@ export default interface IRecepcionist{
     password?: string,
     cpf: string,
     first_access: boolean,
-    doctorId: Types.ObjectId
+    doctorId: Types.ObjectId,
+    admAccont: boolean
 };

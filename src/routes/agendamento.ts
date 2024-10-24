@@ -1,6 +1,6 @@
 import express from 'express';
-import ConsultationMiddleware from '../middleware/Consultation';
 import AgendamentoController from '../controller/Agendamento';
+import ConsultationMiddleware from '../middleware/Consultation';
 
 const agendamentoRouter = express.Router();
 

@@ -11,12 +11,8 @@ export default class RecepcionistService{
         return recepcionist;
     }
 
-    static async getByCpf(cpf: string){
-        const recepcionist = await RecepcionistRepositories.getByCpf(cpf);
-        if(!recepcionist)
-            throw new AppError('CPF or password invalid', 404);
-
-        return recepcionist;
+    static async getByCpf(cpf: string){ 
+        return await RecepcionistRepositories.getByCpf(cpf);
     }
 
     static async createRecepcionist(payload: IRecepcionist){

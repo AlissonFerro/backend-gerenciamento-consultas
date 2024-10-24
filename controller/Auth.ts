@@ -2,35 +2,40 @@ import { Request, Response } from "express";
 import AppError from "../Error";
 import DoctorService from "../service/Doctor";
 import dotenv from 'dotenv';
-import * as jwt from 'jsonwebtoken';
+import { sign } from 'jsonwebtoken';
 import IDoctor from "../interfaces/IDoctor";
+import RecepcionistService from "../service/Recepcionist";
+import CryptoJS from "crypto-js";
 dotenv.config();
-
-const CryptoJS = require("crypto-js");
-const { Recepcionist } = require("../models/Recepcionist");
 
 export default class AuthController{
     static async login(req: Request, res: Response): Promise<void>{
+        if(!process.env.SECRET)
+            throw new AppError('DotEnv Error', 403);
         const { objCrypto } = req.body;
         var bytes = CryptoJS.AES.decrypt(objCrypto, process.env.SECRET);
         const objDecrypt = bytes.toString(CryptoJS.enc.Utf8);
         const obj = JSON.parse(objDecrypt);
         const { login, password } = obj;
 
-        if(!process.env.SECRET)
-            throw new AppError('DotEnv Error', 403);
 
         const user = await DoctorService.getByCpf(login);
-        const recepcionist = await Recepcionist.findOne({ cpf: login });
+        const recepcionist = await RecepcionistService.getByCpf(login);
+
         if(!user && !recepcionist) 
             throw new AppError("CPF or password invalid", 404);
+        
         if(user){
+            if(!user.password)
+                throw new AppError('CPF or password invalid', 404);
+
             bytes = CryptoJS.AES.decrypt(user.password, process.env.SECRET);
             const passDecrypt = bytes.toString(CryptoJS.enc.Utf8);
+
             if(password != passDecrypt) 
                 throw new AppError("CPF or password invalid", 404);
                 
-            const token = jwt.sign({
+            const token = sign({
                 id: user._id,
                 adm: user.adm,
                 first_access: user.first_access,
@@ -40,15 +45,20 @@ export default class AuthController{
             })
 
             res.status(200).send({ token, id: user._id, admAccont: user.admAccont })
+            return
         }
         else{
+            if(!recepcionist.password)
+                throw new AppError('CPF or password invalid', 404);
+
             bytes = CryptoJS.AES.decrypt(recepcionist.password, process.env.SECRET)
             const passDecrypt = bytes.toString(CryptoJS.enc.Utf8)
+            
             if(password != passDecrypt) 
                 throw new AppError("CPF or password invalid", 404);
 
-            const token = jwt.sign({
-                id: recepcionist.id,
+            const token = sign({
+                id: recepcionist._id,
                 adm: false,
                 first_access: recepcionist.first_access,
                 admAccont: recepcionist.admAccont
@@ -57,11 +67,15 @@ export default class AuthController{
             })
 
             res.status(200).send({ token, id: recepcionist._id, admAccont: recepcionist.admAccont })
+            return
         }
     }
 
     static async register(req: Request, res: Response): Promise<void>{
         const { objCrypto } = req.body;
+
+        if(!process.env.SECRET)
+            throw new AppError('DotEnv Error', 403);
 
         var bytes = CryptoJS.AES.decrypt(objCrypto, process.env.SECRET);
         const objDecrypt = bytes.toString(CryptoJS.enc.Utf8);
@@ -99,8 +113,11 @@ export default class AuthController{
         const { id } = req.params;
         const { password, start_time, finish_time, session_time } = req.body;
 
+        if(!process.env.SECRET)
+            throw new AppError('DotEnv Error', 403);
+
         const user = await DoctorService.getById(id);
-        ;
+        
         if(password) {
             const passCrypto = CryptoJS.AES.encrypt(password, process.env.SECRET).toString();
             user.password = passCrypto;
@@ -117,6 +134,10 @@ export default class AuthController{
 
     static async resetPassword(req: Request, res: Response): Promise<void>{
         const { objCrypto } = req.body;
+        
+        if(!process.env.SECRET)
+            throw new AppError('DotEnv Error', 403);
+
         var bytes = CryptoJS.AES.decrypt(objCrypto, process.env.SECRET);
         const objDecrypt = bytes.toString(CryptoJS.enc.Utf8);
         const obj = JSON.parse(objDecrypt);

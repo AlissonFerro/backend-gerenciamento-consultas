@@ -1,4 +1,6 @@
 import mongoose from "mongoose";
+import { consultationSchema } from "./Consultation";
+import { recepcionistShema } from "./Recepcionist";
 
 export const userShema = new mongoose.Schema({
     name: {
@@ -53,14 +55,14 @@ export const userShema = new mongoose.Schema({
         require: true
     },
     vacation: {
-        type: [],
+        type: [Date],
         require: false
     },
     not_avaliable_consultation:{
-        type: []
+        type: [Date]
     },
     recepcionists: {
-        type: [],
+        type: [recepcionistShema],
         require: true
     }
 })

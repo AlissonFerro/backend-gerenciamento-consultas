@@ -1,4 +1,5 @@
 import AppError from "../Error";
+import IRecepcionist from "../interfaces/IRecepcionist";
 import RecepcionistRepositories from "../repositories/Recepcionist";
 
 export default class RecepcionistService{
@@ -14,6 +15,14 @@ export default class RecepcionistService{
         const recepcionist = await RecepcionistRepositories.getByCpf(cpf);
         if(!recepcionist)
             throw new AppError('CPF or password invalid', 404);
+
+        return recepcionist;
+    }
+
+    static async createRecepcionist(payload: IRecepcionist){
+        const recepcionist = await RecepcionistRepositories.createRecepcionist(payload);
+        if(!recepcionist)
+            throw new AppError("Erro ao salvar", 500);
 
         return recepcionist;
     }

@@ -15,6 +15,9 @@ export const recepcionistShema = new mongoose.Schema({
         type: String,
         require: true
     },
+    first_access: {
+        type: Boolean
+    },
     cpf: {
         type: String,
         require: true,

@@ -3,7 +3,7 @@ import IConsultation from "./IConsultation";
 import IRecepcionist from "./IRecepcionist";
 
 export default interface IDoctor{
-    _id: Types.ObjectId,
+    _id?: Types.ObjectId,
     name: string,
     lastname: string,
     password?: string,

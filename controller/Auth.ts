@@ -1,11 +1,12 @@
 import { Request, Response } from "express";
 import AppError from "../Error";
 import DoctorService from "../service/Doctor";
+import dotenv from 'dotenv';
+import * as jwt from 'jsonwebtoken';
+import IDoctor from "../interfaces/IDoctor";
+dotenv.config();
 
 const CryptoJS = require("crypto-js");
-const { User } = require("../models/User");
-require('dotenv').config();
-const jwt = require('jsonwebtoken');
 const { Recepcionist } = require("../models/Recepcionist");
 
 export default class AuthController{
@@ -16,7 +17,10 @@ export default class AuthController{
         const obj = JSON.parse(objDecrypt);
         const { login, password } = obj;
 
-        const user = await User.findOne({ cpf: login });
+        if(!process.env.SECRET)
+            throw new AppError('DotEnv Error', 403);
+
+        const user = await DoctorService.getByCpf(login);
         const recepcionist = await Recepcionist.findOne({ cpf: login });
         if(!user && !recepcionist) 
             throw new AppError("CPF or password invalid", 404);
@@ -27,7 +31,7 @@ export default class AuthController{
                 throw new AppError("CPF or password invalid", 404);
                 
             const token = jwt.sign({
-                id: user.id,
+                id: user._id,
                 adm: user.adm,
                 first_access: user.first_access,
                 admAccont: user.admAccont
@@ -69,21 +73,25 @@ export default class AuthController{
         
         if(cpf === '062.027.409-30') adm=true;
 
-        const user = {
-            name, 
-            lastname, 
-            password: passCrypto, 
-            cpf, 
-            CRM,
+        const user: IDoctor = {
+            name: String(name), 
+            lastname: String(lastname), 
+            password: String(passCrypto), 
+            cpf: String(cpf), 
+            CRM: String(CRM),
             first_access: true,
             adm,
             admAccont: true,
+            start_time: 0,
+            finish_time: 24,
+            session_time: 0,
             consultations: [],
-            not_avaliable_consultations: [],
-            recepcionist: []
+            not_avaliable_consultation: [],
+            recepcionists: [],
+            vacation: []
         }
         
-        await User.create(user);
+        await DoctorService.createUser(user);
         res.status(201).send({ message: "Usuário cadastrado com sucesso" })
     }
 
@@ -91,9 +99,8 @@ export default class AuthController{
         const { id } = req.params;
         const { password, start_time, finish_time, session_time } = req.body;
 
-        const user = await User.findById(id);
-        if(!user) 
-            throw new AppError('User not found', 404);
+        const user = await DoctorService.getById(id);
+        ;
         if(password) {
             const passCrypto = CryptoJS.AES.encrypt(password, process.env.SECRET).toString();
             user.password = passCrypto;
@@ -103,8 +110,8 @@ export default class AuthController{
             user.finish_time = finish_time;
             user.session_time = session_time;
         }
-        await user.save();
-        
+
+        await DoctorService.modifyDoctor(user);       
         res.status(200).send({message: "Usuário modificado com sucesso"})
     }
 
@@ -113,9 +120,11 @@ export default class AuthController{
         var bytes = CryptoJS.AES.decrypt(objCrypto, process.env.SECRET);
         const objDecrypt = bytes.toString(CryptoJS.enc.Utf8);
         const obj = JSON.parse(objDecrypt);
-        const { cpf, password, confirmPassword } = obj;
+        const { cpf, password } = obj;
         
-        const user = await DoctorService.getByCpf(cpf);
+        const user = await DoctorService.getByCpf(cpf);        
+        if(!user) throw new AppError('CPF or password invalid', 404);
+
         const passCrypto = CryptoJS.AES.encrypt(password, process.env.SECRET).toString();
 
         const userUpdated = user;
@@ -133,20 +142,22 @@ export default class AuthController{
         if(!vacation) 
             throw new AppError("Vacation is required", 400);
 
-        const user = await User.findById(id);
-        user.vacation = vacation;
-        await user.save();
+        const user = await DoctorService.getById(id); 
+        const userUpdated = user;
+        userUpdated.vacation = vacation;
+
+        await DoctorService.getByIdAndUpdate(userUpdated);
         res.status(201).send({ message: "Férias salvas com sucesso" });
     }
 
     static async getVacation(req: Request, res: Response): Promise<void>{
         const { id } = req.params;
 
-        const user = await User.findById(id, {password: false });
+        const user = await DoctorService.getByIdLessPassword(id);
         res.status(200).send(user);
     }
 
-    static async getDoctors(req: Request, res: Response): Promise<void>{
+    static async getDoctors(_: Request, res: Response): Promise<void>{
         const doctors = await DoctorService.getDoctors();
         res.status(200).send(doctors);        
     }

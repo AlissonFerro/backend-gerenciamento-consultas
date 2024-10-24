@@ -44,11 +44,7 @@ export default class DoctorService{
     }
 
     static async getByCpf(cpf: string){
-        const doctor = await DoctorRepositories.getByCpf(cpf);
-        if(!doctor)
-            throw new AppError('No user found', 404);
-
-        return doctor;
+        return await DoctorRepositories.getByCpf(cpf);
     }
 
     static async getRecepcionistById(doctorId: string){
@@ -57,5 +53,21 @@ export default class DoctorService{
             throw new AppError('Nenhuma recepcionista encontrada', 404);
 
         return recepcionists;
+    }
+
+    static async getByIdLessPassword(id: string){
+        const doctor = await DoctorRepositories.getByIdLessPassword(id);
+        if(!doctor)
+            throw new AppError('No doctor found', 404);
+
+        return doctor;
+    }
+
+    static async createUser(payload: IDoctor){
+        return await DoctorRepositories.createUser(payload);
+    }
+
+    static async modifyDoctor(payload: IDoctor){
+        return await DoctorRepositories.modifyDoctor(payload);
     }
 }

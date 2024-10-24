@@ -4,9 +4,9 @@ import DoctorService from "../service/Doctor";
 import RecepcionistService from "../service/Recepcionist";
 import * as jwt from 'jsonwebtoken';
 import CryptoJS from "crypto-js";
-
-const { Recepcionist } = require('../models/Recepcionist');
-require('dotenv').config();
+import dotenv from 'dotenv';
+import IRecepcionist from "../interfaces/IRecepcionist";
+dotenv.config();
 
 export default class RecepcionistController{
     static async login(req: Request, res: Response): Promise<void>{
@@ -55,17 +55,17 @@ export default class RecepcionistController{
 
         const passCrypto = CryptoJS.AES.encrypt(password, process.env.SECRET).toString();
 
-        const recepcionist = {
+        const recepcionist: IRecepcionist = {
             name, 
             lastname, 
             password: passCrypto, 
             cpf, 
             first_access: true,
             admAccont: false,
-            doctorId: doctor._id
+            doctorId: doctor._id!
         }
         
-        const recepcionistCreated = await Recepcionist.create(recepcionist);
+        const recepcionistCreated = await RecepcionistService.createRecepcionist(recepcionist);
         doctor.recepcionists.push(recepcionistCreated);
 
         await DoctorService.getByIdAndUpdate(doctor);
